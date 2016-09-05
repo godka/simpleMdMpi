@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <omp.h>
 #pragma comment (lib, "msmpi.lib") 
 
 using namespace std;
@@ -60,6 +61,7 @@ void SingleAcclerations(int i)
 void computeAccelerations(int index, int from, int to) {
 	memset(&a[0][0], 0, N * 3 * sizeof(double));
 	//cout << index << ":(" << from << "," << to << ")" << endl;
+#pragma omp parallel for
 	for (int i = from; i < to; i++){    // loop over all distinct pairs i,j
 		SingleAcclerations(i);
 	}
@@ -114,7 +116,7 @@ void velocityVerlet(double dt) {
 
 void sendBlock(int numprocs)
 {
-	long area = N* (N - 1) / 2;
+	long area = N * (N - 1) / 2;
 	long splice = area / (numprocs - 1);
 
 	long from = N;
@@ -173,7 +175,7 @@ int main(int argc, char* argv [])
 		return 0;
 	}
 	if (myid == 0){
-		int num = numprocs - 1;
+		//int num = numprocs - 1;
 		ofstream file("T.data");
 		for (int times = 0; times < TIMES; times++){
 			//b_CAST
