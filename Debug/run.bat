@@ -1,2 +1,2 @@
-mpiexec -n 8 testmpi
+mpiexec -n 4 SimpleMdMpi
 pause
