@@ -151,7 +151,8 @@ int main(int argc, char* argv[])
 	double t1 = MPI_Wtime();
 	ofstream file("NoMPI.data");
         for (int times = 0; times < TIMES; times++){
-            computeAccelerations(0, 0, N - 1);
+            if(times == 0)
+		computeAccelerations(0, 0, N - 1);
             for (int i = 0; i < N; i++) {
                 for (int k = 0; k < 3; k++) {
                     r[i][k] += v[i][k] * dt + 0.5 * a[i][k] * dt * dt;
@@ -168,7 +169,10 @@ int main(int argc, char* argv[])
         }
         file.close();
         double t2 = MPI_Wtime();
+	ofstream file2("single.time");
 	cout << "timespan:" << t2 - t1 << "s" << endl;
+	file2 << t2 - t1 << endl;
+	file2.close();
 	return 0;
     }
     if (myid == 0){
@@ -176,7 +180,7 @@ int main(int argc, char* argv[])
 	cout << "numprocs = " << numprocs << endl;
 	//int num = numprocs - 1;
         double t1 = MPI_Wtime();
-	ofstream file("T.data");
+	ofstream file("mpi.data");
         for (int i = 1; i < numprocs; i++){
             MPI_Send(&r[0][0], N * 3, MPI_DOUBLE, i, 1, MPI_COMM_WORLD);
         }
@@ -206,7 +210,12 @@ int main(int argc, char* argv[])
         }
         file.close();
     	double t2 = MPI_Wtime();
+	char tmp[256] = {0};
+	sprintf(tmp,"mpi-%d.time",numprocs);
+        ofstream file2(tmp);
         cout << "timespan:" << t2 - t1 << "s" << endl;
+        file2 << t2 - t1 << endl;
+        file2.close();
     }
     else{
         MPI_Status status;
